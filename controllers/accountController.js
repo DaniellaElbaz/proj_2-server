@@ -1,13 +1,12 @@
 exports.accountController = {
     async login(req, res) {
         const { username, password } = req.body;
-        const { dbConnection } = require('../db_connection'); 
+        const { dbConnection } = require('../db_connection');
         if (!username || !password) {
             return res.status(400).json({ success: false, message: 'Username and password are required' });
         }
         try {
             const connection = await dbConnection.createConnection();
-            
             const [rows] = await connection.execute(
                 'SELECT * FROM tbl105_account WHERE username = ? AND password = ?',
                 [username, password]
