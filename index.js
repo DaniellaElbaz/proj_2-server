@@ -4,7 +4,7 @@ const app = express();
 const port = process.env.PORT || 8081;
 const { eventHistoryRouter } = require('./routers/eventHistoryRouter.js');
 const { accountRouter } = require('./routers/accountRouter.js'); 
-
+const { madaHomePageRouter } = require('./routers/madaHomePageRouter.js'); 
 
 app.use((req, res, next) => {
     res.set({
@@ -22,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/eventHistory', eventHistoryRouter);
 app.use('/api/account', accountRouter);
-
+app.use('/api/madaHomePage', madaHomePageRouter);
 app.use((req, res) => {
     console.error('Path not found:', req.path);
     res.status(400).send('something is broken!');
