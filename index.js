@@ -3,8 +3,8 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 8081;
 const { eventHistoryRouter } = require('./routers/eventHistoryRouter.js');
-const { accountRouter } = require('./routers/accountRouter.js'); 
-const { madaHomePageRouter } = require('./routers/madaHomePageRouter.js'); 
+const { accountRouter } = require('./routers/accountRouter.js');
+const { madaHomePageRouter } = require('./routers/madaHomePageRouter.js');
 
 app.use((req, res, next) => {
     res.set({
