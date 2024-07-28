@@ -5,7 +5,7 @@ const port = process.env.PORT || 8081;
 const { eventHistoryRouter } = require('./routers/eventHistoryRouter.js');
 const { accountRouter } = require('./routers/accountRouter.js');
 const { madaHomePageRouter } = require('./routers/madaHomePageRouter.js');
-
+const { eventTypeRouter } = require('./routers/eventTypeRouter.js');
 app.use((req, res, next) => {
     res.set({
         'Access-Control-Allow-Origin': '*',
@@ -19,7 +19,7 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
+app.use('/api/eventTypeRouter', eventTypeRouter);
 app.use('/api/eventHistory', eventHistoryRouter);
 app.use('/api/account', accountRouter);
 app.use('/api/madaHomePage', madaHomePageRouter);
