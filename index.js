@@ -19,7 +19,7 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/api/eventTypeRouter', eventTypeRouter);
+app.use('/api/eventType', eventTypeRouter);
 app.use('/api/eventHistory', eventHistoryRouter);
 app.use('/api/account', accountRouter);
 app.use('/api/madaHomePage', madaHomePageRouter);
