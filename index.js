@@ -19,18 +19,7 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/');
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname);
-    }
-});
 
-const upload = multer({ storage });
-
-app.use('/uploads', express.static('uploads'));
 app.use('/api/eventType', eventTypeRouter);
 app.use('/api/eventHistory', eventHistoryRouter);
 app.use('/api/account', accountRouter);
