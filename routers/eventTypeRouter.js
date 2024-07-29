@@ -3,15 +3,13 @@ const multer = require('multer');
 const { eventTypeController } = require('../controllers/eventTypeController.js');
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        console.log('Saving file to images/ directory');
-        cb(null, 'images/');
+        cb(null, path.join(__dirname, '../images'));
     },
     filename: function (req, file, cb) {
-        const filename = Date.now() + '-' + file.originalname;
-        console.log('Saving file as:', filename);
-        cb(null, filename);
+        cb(null, Date.now() + '-' + file.originalname);
     }
 });
+
 
 const upload = multer({ storage });
 const eventTypeRouter = new Router();
