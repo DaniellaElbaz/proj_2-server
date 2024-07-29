@@ -29,4 +29,5 @@ const upload = multer({ storage });
 eventTypeRouter.get('/', eventTypeController.getEventTypeName);
 eventTypeRouter.get('/MDA', eventTypeController.getEventMDAEvents);
 eventTypeRouter.post('/add', upload.array('eventPhotos'), eventTypeController.addEvents);
+eventTypeRouter.delete('/delete/:id', eventTypeController.deleteEvent);
 module.exports = { eventTypeRouter };

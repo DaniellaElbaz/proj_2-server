@@ -30,7 +30,6 @@ exports.eventTypeController = {
             const { eventName, eventPlace, eventDate, eventTime, eventStatus, eventType, maxHelper } = req.body;
             const photos = req.files.map(file => file.filename).join(',');
             const values = [eventName, eventPlace, eventDate, eventTime, eventStatus, photos, eventType, maxHelper];
-            
             const [queryResult] = await connection.execute(
                 'INSERT INTO tbl105_MDA_live_event (event_name, place, date, time, status, map, event_type, max_helper) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
                 values
@@ -39,6 +38,23 @@ exports.eventTypeController = {
             res.json({ success: true, queryResult });
         } catch (error) {
             console.error('Error adding event:', error);
+            res.status(500).json({ success: false, message: 'Internal Server Error' });
+        }
+    },
+    async  deleteEvent(req, res) {
+        const { dbConnection } = require('../db_connection');
+        const eventId = req.params.id;
+        try {
+            const connection = await dbConnection.createConnection();
+            const [result] = await connection.execute('DELETE FROM tbl105_MDA_live_event WHERE event_id = ?', [eventId]);
+            connection.end();
+            if (result.affectedRows > 0) {
+                res.json({ success: true });
+            } else {
+                res.status(404).json({ success: false, message: 'Event not found' });
+            }
+        } catch (error) {
+            console.error('Error deleting event:', error);
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
     }
