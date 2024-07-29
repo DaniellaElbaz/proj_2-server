@@ -20,12 +20,10 @@ const storage = multer.diskStorage({
         cb(null, imagesDir);
     },
     filename: function (req, file, cb) {
-        const filename = Date.now() + '-' + file.originalname;
-        console.log(`Saving file as: ${filename}`);
-        cb(null, filename);
+        console.log(`Saving file as: ${file.originalname}`);
+        cb(null, file.originalname);
     }
 });
-
 
 const upload = multer({ storage });
 eventTypeRouter.get('/', eventTypeController.getEventTypeName);

@@ -33,9 +33,8 @@ const upload = multer({
             cb(null, imagesDir);
         },
         filename: function (req, file, cb) {
-            const filename = Date.now() + '-' + file.originalname;
-            console.log(`Saving file as: ${filename}`);
-            cb(null, filename);
+            console.log(`Saving file as: ${file.originalname}`);
+            cb(null, file.originalname);
         }
     })
 });
