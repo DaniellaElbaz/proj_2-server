@@ -28,7 +28,7 @@ exports.eventTypeController = {
         try {
             const connection = await dbConnection.createConnection();
             const { eventName, eventPlace, eventDate, eventTime, eventStatus, eventType, maxHelper } = req.body;
-            const photos = req.files.map(file => file.filename).join(',');
+            const photos = req.files ? req.files.map(file => file.filename).join(',') : '';
             const values = [eventName, eventPlace, eventDate, eventTime, eventStatus, photos, eventType, maxHelper];
             
             const [queryResult] = await connection.execute(
