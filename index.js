@@ -1,21 +1,9 @@
 require('dotenv').config();
 const express = require('express');
 const multer = require('multer');
+const path = require('path');
 const app = express();
 const port = process.env.PORT || 8081;
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        console.log('Saving file to images/ directory');
-        cb(null, '../images/');
-    },
-    filename: function (req, file, cb) {
-        const filename = Date.now() + '-' + file.originalname;
-        console.log('Saving file as:', filename);
-        cb(null, filename);
-    }
-});
-
-const upload = multer({ storage });
 const { eventHistoryRouter } = require('./routers/eventHistoryRouter.js');
 const { accountRouter } = require('./routers/accountRouter.js');
 const { madaHomePageRouter } = require('./routers/madaHomePageRouter.js');
@@ -29,7 +17,16 @@ app.use((req, res, next) => {
     });
     next();
 });
-
+const upload = multer({
+    storage: multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'images/');
+        },
+        filename: function (req, file, cb) {
+            cb(null, Date.now() + '-' + file.originalname);
+        }
+    })
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
