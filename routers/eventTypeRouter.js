@@ -4,7 +4,7 @@ const { eventTypeController } = require('../controllers/eventTypeController.js')
 const upload = multer({
     storage: multer.diskStorage({
         destination: function (req, file, cb) {
-            cb(null, 'uploads/');
+            cb(null, 'images/');
         },
         filename: function (req, file, cb) {
             cb(null, Date.now() + '-' + file.originalname);
