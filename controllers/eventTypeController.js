@@ -22,5 +22,24 @@ exports.eventTypeController = {
             console.error('Error fetching events:', error);
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
+    },
+    async addEvents(req, res) {
+        const { dbConnection } = require('../db_connection');
+        try {
+            const connection = await dbConnection.createConnection();
+            const { eventName, eventPlace, eventDate, eventTime, eventStatus, eventType, maxHelper } = req.body;
+            const photos = req.files.map(file => file.filename).join(',');
+            const values = [eventName, eventPlace, eventDate, eventTime, eventStatus, photos, eventType, maxHelper];
+            
+            const [queryResult] = await connection.execute(
+                'INSERT INTO events (event_name, place, date, time, status, map, event_type, max_helper) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                values
+            );
+            connection.end();
+            res.json({ success: true, queryResult });
+        } catch (error) {
+            console.error('Error adding event:', error);
+            res.status(500).json({ success: false, message: 'Internal Server Error' });
+        }
     }
-    };
+}
