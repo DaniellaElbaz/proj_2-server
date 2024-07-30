@@ -3,11 +3,9 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const socketIo = require('socket.io');
-const http = require('http');
 const app = express();
-const server = http.createServer(app);
-const io = socketIo(server);
+
+
 const port = process.env.PORT || 8081;
 const {weatherRouter} = require('./routers/weatherRouter.js');
 const { eventHistoryRouter } = require('./routers/eventHistoryRouter.js');
@@ -44,23 +42,18 @@ const upload = multer({
         }
     })
 });
-app.set('io', io);
+
 app.use('/api/weather', weatherRouter);
 app.use('/api/eventType', eventTypeRouter);
 app.use('/api/eventHistory', eventHistoryRouter);
 app.use('/api/account', accountRouter);
 app.use('/api/madaHomePage', madaHomePageRouter);
-app.use('/socket.io', express.static(path.join(__dirname, 'node_modules', 'socket.io', 'client-dist')));
+
 app.use((req, res) => {
     console.error('Path not found:', req.path);
     res.status(400).send('something is broken!');
 });
-io.on('connection', (socket) => {
-    console.log('New client connected');
-    socket.on('disconnect', () => {
-        console.log('Client disconnected');
-    });
-});
+
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });

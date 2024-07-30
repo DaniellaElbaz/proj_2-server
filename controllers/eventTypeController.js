@@ -81,7 +81,6 @@ exports.eventTypeController = {
         const { insertUpdateRecord } =accountController;
         const eventId = req.params.id;
         const eventStatus = req.body.status;
-        const updateDescription = req.body.updateDescription;
         try {
             const connection = await dbConnection.createConnection();
             await connection.execute(
@@ -89,8 +88,8 @@ exports.eventTypeController = {
                 [eventStatus, eventId]
             );
             connection.end();
-            await insertUpdateRecord(eventId, updateDescription);
-            io.emit('statusUpdate', { eventId, eventStatus, updateDescription });
+            await insertUpdateRecord(eventId, eventStatus);
+            io.emit('statusUpdate', { eventId, eventStatus});
             res.status(200).send({ message: 'Event status updated successfully' });
         } catch (error) {
             console.error('Error updating event status:', error);
