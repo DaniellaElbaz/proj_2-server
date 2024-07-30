@@ -25,6 +25,7 @@ exports.eventTypeController = {
     },
     async addEvents(req, res) {
         const { dbConnection } = require('../db_connection');
+        const { updateUserPlace } = require('./accountController');
         try {
             const connection = await dbConnection.createConnection();
             const { eventName, eventPlace, eventDate, eventTime, eventStatus, eventType, maxHelper } = req.body;
@@ -34,23 +35,37 @@ exports.eventTypeController = {
                 'INSERT INTO tbl105_MDA_live_event (event_name, place, date, time, status, map, event_type, max_helper) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
                 values
             );
+            await updateUserPlace(eventPlace);
             connection.end();
+            const io = req.app.get('io');
+            io.emit('eventAdded', { eventName, eventPlace, eventDate, eventTime, eventStatus, photos, eventType, maxHelper });
             res.json({ success: true, queryResult });
         } catch (error) {
             console.error('Error adding event:', error);
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
     },
-    async  deleteEvent(req, res) {
+    async deleteEvent(req, res) {
         const { dbConnection } = require('../db_connection');
+        const { updateUserPlace } = require('./accountController');
         const eventId = req.params.id;
         try {
             const connection = await dbConnection.createConnection();
+            const [event] = await connection.execute('SELECT place FROM tbl105_MDA_live_event WHERE event_id = ?', [eventId]);
+            if (event.length === 0) {
+                connection.end();
+                return res.status(404).json({ success: false, message: 'Event not found' });
+            }
+            const eventPlace = event[0].place;
             const [result] = await connection.execute('DELETE FROM tbl105_MDA_live_event WHERE event_id = ?', [eventId]);
-            connection.end();
             if (result.affectedRows > 0) {
+                await updateUserPlace(null);
+                connection.end();
+                const io = req.app.get('io');
+                io.emit('eventDeleted', { eventId });
                 res.json({ success: true });
             } else {
+                connection.end();
                 res.status(404).json({ success: false, message: 'Event not found' });
             }
         } catch (error) {

@@ -3,7 +3,11 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const socketIo = require('socket.io');
 const app = express();
+const http = require('http');
+const server = http.createServer(app);
+const io = socketIo(server);
 const port = process.env.PORT || 8081;
 const { eventHistoryRouter } = require('./routers/eventHistoryRouter.js');
 const { accountRouter } = require('./routers/accountRouter.js');
@@ -38,7 +42,7 @@ const upload = multer({
         }
     })
 });
-
+app.set('io', io);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -50,7 +54,12 @@ app.use((req, res) => {
     console.error('Path not found:', req.path);
     res.status(400).send('something is broken!');
 });
-
+io.on('connection', (socket) => {
+    console.log('New client connected');
+    socket.on('disconnect', () => {
+        console.log('Client disconnected');
+    });
+});
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });

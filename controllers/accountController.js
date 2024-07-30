@@ -22,5 +22,19 @@ exports.accountController = {
             console.error('Error during login:', error);
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
+    },
+    async updateUserPlace(eventPlace) {
+        const { dbConnection } = require('../db_connection');
+        try {
+            const connection = await dbConnection.createConnection();
+            await connection.execute(
+                'UPDATE tbl105_account SET place = ? WHERE certification_type = "Medical"',
+                [eventPlace]
+            );
+            connection.end();
+        } catch (error) {
+            console.error('Error updating user place:', error);
+            throw error;
+        }
     }
 };
