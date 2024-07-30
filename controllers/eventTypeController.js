@@ -81,6 +81,7 @@ exports.eventTypeController = {
         const { insertUpdateRecord } =accountController;
         const eventId = req.params.id;
         const eventStatus = req.body.status;
+        const io = req.io; 
         try {
             const connection = await dbConnection.createConnection();
             await connection.execute(

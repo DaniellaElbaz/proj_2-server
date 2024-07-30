@@ -3,8 +3,11 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const http = require('http');
+const socketIO = require('socket.io');
 const app = express();
-
+const server = http.createServer(app);
+const io = socketIO(server);
 
 const port = process.env.PORT || 8081;
 const {weatherRouter} = require('./routers/weatherRouter.js');
@@ -42,7 +45,10 @@ const upload = multer({
         }
     })
 });
-
+app.use((req, res, next) => {
+    req.io = io;
+    next();
+})
 app.use('/api/weather', weatherRouter);
 app.use('/api/eventType', eventTypeRouter);
 app.use('/api/eventHistory', eventHistoryRouter);
@@ -54,6 +60,6 @@ app.use((req, res) => {
     res.status(400).send('something is broken!');
 });
 
-app.listen(port, () => {
+server.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
