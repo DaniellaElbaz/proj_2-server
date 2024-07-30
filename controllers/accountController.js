@@ -36,5 +36,19 @@ exports.accountController = {
             console.error('Error updating user place:', error);
             throw error;
         }
+    },
+    async insertUpdateRecord(eventId, updateDescription) {
+        const { dbConnection } = require('../db_connection');
+        try {
+            const connection = await dbConnection.createConnection();
+            await connection.execute(
+                'INSERT INTO tbl105_update_MDA_event (event_id, update_description) VALUES (?, ?)',
+                [eventId, updateDescription]
+            );
+            connection.end();
+        } catch (error) {
+            console.error('Error inserting update record:', error);
+            throw error;
+        }
     }
 };
