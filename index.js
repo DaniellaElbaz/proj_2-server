@@ -11,7 +11,7 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 const port = process.env.PORT || 8081;
-const weatherRouter = require('./routers/weatherRouter.js');
+const {weatherRouter} = require('./routers/weatherRouter.js');
 const { eventHistoryRouter } = require('./routers/eventHistoryRouter.js');
 const { accountRouter } = require('./routers/accountRouter.js');
 const { madaHomePageRouter } = require('./routers/madaHomePageRouter.js');
