@@ -25,7 +25,8 @@ exports.eventTypeController = {
     },
     async addEvents(req, res) {
         const { dbConnection } = require('../db_connection');
-        const { updateUserPlace } = require('./accountController');
+        const { accountController } = require('./accountController');
+        const { updateUserPlace } =accountController;
         try {
             const connection = await dbConnection.createConnection();
             const { eventName, eventPlace, eventDate, eventTime, eventStatus, eventType, maxHelper } = req.body;
