@@ -73,5 +73,22 @@ exports.eventTypeController = {
             console.error('Error deleting event:', error);
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
+    },
+    async updateStatus(req, res) {
+        const { dbConnection } = require('../db_connection');
+        const eventId = req.params.id;
+        const eventStatus = req.body.status;
+        try {
+            const connection = await dbConnection.createConnection();
+            await connection.execute(
+                'UPDATE tbl105_MDA_live_event SET status = ? WHERE event_id = ?',
+                [eventStatus, eventId]
+            );
+            connection.end();
+            res.status(200).send({ message: 'Event status updated successfully' });
+        } catch (error) {
+            console.error('Error updating event status:', error);
+            res.status(500).send({ error: 'Error updating event status' });
+        }
     }
 }

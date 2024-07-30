@@ -30,4 +30,5 @@ eventTypeRouter.get('/', eventTypeController.getEventTypeName);
 eventTypeRouter.get('/MDA', eventTypeController.getEventMDAEvents);
 eventTypeRouter.post('/add', upload.array('eventPhotos'), eventTypeController.addEvents);
 eventTypeRouter.delete('/delete/:id', eventTypeController.deleteEvent);
+eventTypeRouter.put('/:id', eventTypeController.updateStatus);
 module.exports = { eventTypeRouter };
