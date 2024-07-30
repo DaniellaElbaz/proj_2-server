@@ -7,8 +7,13 @@ const socketIo = require('socket.io');
 const http = require('http');
 
 const app = express();
-const server = http.createServer(app);
-const io = socketIo(server);
+const server = http.createServer();
+const io = socketIo(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
 
 const port = process.env.PORT || 8081;
 const {weatherRouter} = require('./routers/weatherRouter.js');
