@@ -7,7 +7,7 @@ const socketIo = require('socket.io');
 const http = require('http');
 
 const app = express();
-const server = http.createServer();
+const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
         origin: "*",
@@ -60,7 +60,7 @@ app.use('/api/eventType', eventTypeRouter);
 app.use('/api/eventHistory', eventHistoryRouter);
 app.use('/api/account', accountRouter);
 app.use('/api/madaHomePage', madaHomePageRouter);
-app.use('/socket.io', express.static(path.join(__dirname, 'node_modules', 'socket.io', 'client-dist')));
+app.use(express.static('public'));
 app.use((req, res) => {
     console.error('Path not found:', req.path);
     res.status(400).send('something is broken!');
