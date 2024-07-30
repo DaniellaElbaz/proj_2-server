@@ -55,6 +55,7 @@ app.use('/api/eventType', eventTypeRouter);
 app.use('/api/eventHistory', eventHistoryRouter);
 app.use('/api/account', accountRouter);
 app.use('/api/madaHomePage', madaHomePageRouter);
+app.use('/socket.io', express.static(path.join(__dirname, 'node_modules', 'socket.io', 'client-dist')));
 app.use((req, res) => {
     console.error('Path not found:', req.path);
     res.status(400).send('something is broken!');
