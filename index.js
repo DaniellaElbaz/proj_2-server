@@ -9,6 +9,7 @@ const http = require('http');
 const server = http.createServer(app);
 const io = socketIo(server);
 const port = process.env.PORT || 8081;
+const weatherRouter = require('./routes/weatherRouter');
 const { eventHistoryRouter } = require('./routers/eventHistoryRouter.js');
 const { accountRouter } = require('./routers/accountRouter.js');
 const { madaHomePageRouter } = require('./routers/madaHomePageRouter.js');
@@ -45,7 +46,7 @@ const upload = multer({
 app.set('io', io);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+app.use('/api/weather', weatherRouter);
 app.use('/api/eventType', eventTypeRouter);
 app.use('/api/eventHistory', eventHistoryRouter);
 app.use('/api/account', accountRouter);
