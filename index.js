@@ -5,23 +5,15 @@ const path = require('path');
 const fs = require('fs');
 const socketIo = require('socket.io');
 const http = require('http');
-
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server, {
-    cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
-    }
-});
-
+const io = socketIo(server);
 const port = process.env.PORT || 8081;
 const {weatherRouter} = require('./routers/weatherRouter.js');
 const { eventHistoryRouter } = require('./routers/eventHistoryRouter.js');
 const { accountRouter } = require('./routers/accountRouter.js');
 const { madaHomePageRouter } = require('./routers/madaHomePageRouter.js');
 const { eventTypeRouter } = require('./routers/eventTypeRouter.js');
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use((req, res, next) => {
@@ -40,7 +32,6 @@ if (!fs.existsSync(imagesDir)) {
 } else {
     console.log(`Images directory exists at: ${imagesDir}`);
 }
-
 const upload = multer({
     storage: multer.diskStorage({
         destination: function (req, file, cb) {
@@ -54,23 +45,22 @@ const upload = multer({
     })
 });
 app.set('io', io);
-
 app.use('/api/weather', weatherRouter);
 app.use('/api/eventType', eventTypeRouter);
 app.use('/api/eventHistory', eventHistoryRouter);
 app.use('/api/account', accountRouter);
 app.use('/api/madaHomePage', madaHomePageRouter);
-app.use(express.static('public'));
+app.use('/socket.io', express.static(path.join(__dirname, 'node_modules', 'socket.io', 'client-dist')));
 app.use((req, res) => {
     console.error('Path not found:', req.path);
     res.status(400).send('something is broken!');
 });
 io.on('connection', (socket) => {
-    console.log('A user connected');
+    console.log('New client connected');
     socket.on('disconnect', () => {
-      console.log('User disconnected');
+        console.log('Client disconnected');
     });
-  });
+});
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
