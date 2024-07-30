@@ -41,9 +41,11 @@ exports.accountController = {
         const { dbConnection } = require('../db_connection');
         try {
             const connection = await dbConnection.createConnection();
+            const now = new Date();
+            const timeString = now.toTimeString().split(' ')[0];
             await connection.execute(
-                'INSERT INTO tbl105_update_MDA_event (event_id, update_description) VALUES (?, ?)',
-                [eventId, updateDescription]
+                'INSERT INTO tbl105_update_MDA_event (event_id, update_description,time) VALUES (?, ?, ?)',
+                [eventId, updateDescription, timeString]
             );
             connection.end();
         } catch (error) {
