@@ -5,7 +5,7 @@ exports.eventLiveController = {
             const connection = await dbConnection.createConnection();
             const [eventLiveReports] = await connection.execute(`
                 SELECT event_name, event_status, type_event 
-                FROM tbl105_tbl105_events_history 
+                FROM tbl105_events_history 
                 ORDER BY date_and_time DESC 
                 LIMIT 1;
             `);
