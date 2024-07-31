@@ -11,7 +11,7 @@ async getEventHistory(req, res) {
         res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 },
-async  getEventByTypeEndDate(req, res) {
+async getEventByTypeEndDate(req, res) {
     const { dbConnection } = require('../db_connection');
     let { eventType, date_and_time } = req.query;
 
