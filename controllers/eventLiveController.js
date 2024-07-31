@@ -1,4 +1,4 @@
-exports.madaHomePageController = {
+exports.eventLiveController = {
     async getLiveReports(req, res) {
         const { dbConnection } = require('../db_connection');
         try {
