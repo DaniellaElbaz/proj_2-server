@@ -11,10 +11,15 @@ async getEventHistory(req, res) {
         res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 },
-async  getEventByTypeEndDate(req, res) {
+async getEventByTypeEndDate(req, res) {
     const { dbConnection } = require('../db_connection');
-    const { eventType, month } = req.query;
+    let { eventType, date_and_time } = req.query;
 
+    // Convert undefined to null
+    eventType = eventType === undefined ? null : eventType;
+    date_and_time = date_and_time === undefined ? null : date_and_time;
+    console.log('EventType:', eventType);
+    console.log('Date and Time:', date_and_time);
     try {
         const connection = await dbConnection.createConnection();
         const [rows] = await connection.execute(
@@ -24,7 +29,7 @@ async  getEventByTypeEndDate(req, res) {
                 AND (? IS NULL OR DATE_FORMAT(date_and_time, '%Y-%m') = ?)
             GROUP BY type_event, month
             ORDER BY month;`,
-            [eventType, eventType, month, month]
+            [eventType, eventType, date_and_time, date_and_time]
         );
         connection.end();
         res.json({ success: true, data: rows });
