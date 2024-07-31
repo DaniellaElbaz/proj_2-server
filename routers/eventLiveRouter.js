@@ -1,8 +1,8 @@
 const { Router } = require('express');
-const { madaHomePageController } = require('../controllers/madaHomePageController.js');
+const { eventLiveController } = require('../controllers/eventLiveController.js');
 
-const madaHomePageRouter = new Router();
+const eventLiveRouter = new Router();
 
-madaHomePageRouter.get('/', madaHomePageController.getNotification);
+eventLiveRouter.get('/', eventLiveController.getLiveReports);
 
-module.exports = { madaHomePageRouter };
+module.exports = { eventLiveRouter };

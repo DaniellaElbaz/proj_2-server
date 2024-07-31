@@ -1,5 +1,5 @@
 exports.madaHomePageController = {
-    async getNotification(req, res) {
+    async getLiveReports(req, res) {
         const { dbConnection } = require('../db_connection');
         try {
             const connection = await dbConnection.createConnection();
