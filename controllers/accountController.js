@@ -45,7 +45,7 @@ exports.accountController = {
         const timeString = now.toTimeString().split(' ')[0];
 
         await connection.execute(
-            'INSERT INTO tbl105_update_MDA_event (event_id, update_description, update_time) VALUES (?, ?, ?)',
+            'INSERT INTO tbl105_update_MDA_event (event_id, update_description,time) VALUES (?, ?, ?)',
             [eventId, updateDescription, timeString]
         );
 
