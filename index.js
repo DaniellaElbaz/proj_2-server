@@ -16,6 +16,7 @@ const { accountRouter } = require('./routers/accountRouter.js');
 const { madaHomePageRouter } = require('./routers/madaHomePageRouter.js');
 const { eventTypeRouter } = require('./routers/eventTypeRouter.js');
 const { eventLiveRouter } = require('./routers/eventLiveRouter.js');
+const { userHomePageRouter } = require('./routers/userHomePageRouter.js');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use((req, res, next) => {
@@ -50,6 +51,7 @@ app.use((req, res, next) => {
     req.io = io;
     next();
 })
+app.use('/api/user', userHomePageRouter);
 app.use('/api/weather', weatherRouter);
 app.use('/api/eventType', eventTypeRouter);
 app.use('/api/eventHistory', eventHistoryRouter);
