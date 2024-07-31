@@ -88,9 +88,10 @@ exports.eventTypeController = {
                 'UPDATE tbl105_MDA_live_event SET status = ? WHERE event_id = ?',
                 [eventStatus, eventId]
             );
-            connection.end();
+           
             await insertUpdateRecord(eventId, eventStatus);
             io.emit('statusUpdate', { eventId, eventStatus});
+            connection.end();
             res.status(200).send({ message: 'Event status updated successfully' });
         } catch (error) {
             console.error('Error updating event status:', error);
