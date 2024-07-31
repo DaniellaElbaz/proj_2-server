@@ -3,5 +3,5 @@ const { eventHistoryController } = require('../controllers/eventHistoryControlle
 
 const eventHistoryRouter = new Router();
 eventHistoryRouter.get('/', eventHistoryController.getEventHistory);
-
+eventHistoryRouter.get('/eventStats', eventHistoryController.getEventByTypeEndDate);
 module.exports = { eventHistoryRouter };
