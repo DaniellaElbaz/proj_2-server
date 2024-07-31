@@ -11,7 +11,7 @@ async getEventHistory(req, res) {
         res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 },
-async getEventByTypeEndDate(req, res) {
+async  getEventByTypeEndDate(req, res) {
     const { dbConnection } = require('../db_connection');
     let { eventType, date_and_time } = req.query;
 
@@ -21,6 +21,16 @@ async getEventByTypeEndDate(req, res) {
 
     eventType = eventType === undefined || eventType === '' ? null : eventType;
     date_and_time = date_and_time === undefined || date_and_time === '' ? formattedMonth : date_and_time;
+    
+    let endDate = null;
+    if (eventType === 'all') {
+        // Show all months
+        endDate = null;
+    } else {
+        // Filter by specific month
+        endDate = date_and_time;
+    }
+    
     try {
         const connection = await dbConnection.createConnection();
         const [rows] = await connection.execute(
@@ -28,9 +38,10 @@ async getEventByTypeEndDate(req, res) {
             FROM tbl105_events_history
             WHERE (? IS NULL OR type_event = ?)
                 AND (? IS NULL OR DATE_FORMAT(date_and_time, '%Y-%m') >= ?)
+                AND (? IS NULL OR DATE_FORMAT(date_and_time, '%Y-%m') <= ?)
             GROUP BY type_event, month
             ORDER BY month;`,
-            [eventType, eventType, date_and_time, date_and_time]
+            [eventType, eventType, date_and_time, date_and_time, endDate, endDate]
         );
         connection.end();
         res.json({ success: true, data: rows });
