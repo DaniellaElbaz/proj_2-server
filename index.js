@@ -15,6 +15,7 @@ const { eventHistoryRouter } = require('./routers/eventHistoryRouter.js');
 const { accountRouter } = require('./routers/accountRouter.js');
 const { madaHomePageRouter } = require('./routers/madaHomePageRouter.js');
 const { eventTypeRouter } = require('./routers/eventTypeRouter.js');
+const { eventLiveRouter } = require('./routers/eventLiveRouter.js');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use((req, res, next) => {
@@ -54,6 +55,7 @@ app.use('/api/eventType', eventTypeRouter);
 app.use('/api/eventHistory', eventHistoryRouter);
 app.use('/api/account', accountRouter);
 app.use('/api/madaHomePage', madaHomePageRouter);
+app.use('/api/eventLive', eventLiveRouter);
 
 app.use((req, res) => {
     console.error('Path not found:', req.path);
