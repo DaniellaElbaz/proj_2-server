@@ -7,8 +7,6 @@ exports.accountController = {
         }
         try {
             const connection = await dbConnection.createConnection();
-
-            // שליפת פרטי המשתמש מהטבלה tbl105_account
             const [rows] = await connection.execute(
                 'SELECT * FROM tbl105_account WHERE username = ? AND password = ?',
                 [username, password]
@@ -20,23 +18,12 @@ exports.accountController = {
                 // עדכון event_id בחשבון על פי התאמת place
                 const [updateResult] = await connection.execute(`
                     UPDATE tbl105_account AS a
-                    JOIN tbl105_MDA_live_event AS e ON TRIM(a.place) = TRIM(e.place)
+                    JOIN tbl105_MDA_live_event AS e ON a.place = e.place
                     SET a.event_id = e.event_id
                     WHERE a.user_id = ?
                 `, [userId]);
 
                 console.log(`Updated ${updateResult.affectedRows} rows with matching place.`);
-
-                // הכנסת נתונים לטבלה tbl105_users_event
-                const [insertResult] = await connection.execute(`
-                    INSERT INTO tbl105_users_event (user_id, event_id, place)
-                    SELECT a.user_id, e.event_id, TRIM(a.place)
-                    FROM tbl105_account AS a
-                    JOIN tbl105_MDA_live_event AS e ON TRIM(a.place) = TRIM(e.place)
-                    WHERE a.user_id = ?;
-                `, [userId]);
-
-                console.log(`Inserted ${insertResult.affectedRows} rows into tbl105_users_event.`);
 
                 // החזרת תגובה לאחר עדכון מוצלח
                 res.json({ success: true, user: rows[0] });
@@ -71,7 +58,7 @@ exports.accountController = {
             const timeString = now.toTimeString().split(' ')[0];
 
             await connection.execute(
-                'INSERT INTO tbl105_update_MDA_event (event_id, update_description, time) VALUES (?, ?, ?)',
+                'INSERT INTO tbl105_update_MDA_event (event_id, update_description,time) VALUES (?, ?, ?)',
                 [eventId, updateDescription, timeString]
             );
 
