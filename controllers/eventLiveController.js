@@ -14,9 +14,9 @@ exports.eventLiveController = {
 
             // השאילתא השנייה להבאת 3 האירועים העדכניים ביותר לפי שעות
             const [recentReports] = await connection.execute(`
-                SELECT report_description, DATE_FORMAT(report_time, '%H:%i') AS report_time
-                FROM tbl105_MDA_reports
-                ORDER BY report_time DESC
+                SELECT update_description, DATE_FORMAT(time, '%H:%i') AS time
+                FROM tbl105_update_MDA_event
+                ORDER BY time DESC
                 LIMIT 3;
             `);
 
