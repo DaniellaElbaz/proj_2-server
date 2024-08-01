@@ -6,37 +6,31 @@ exports.accountController = {
     try {
         // Get a connection from the pool
         const connection = await dbConnection.createConnection();
+        const [userResults] = await connection.execute(
+            'SELECT * FROM tbl105_account WHERE username = ? AND password = ?',
+            [username, password]
+        );
 
-        try {
-            // Check user credentials
-            const [userResults] = await connection.execute(
-                'SELECT * FROM tbl105_account WHERE username = ? AND password = ?',
-                [username, password]
-            );
+        if (userResults.length === 0) {
+            await connection.end();
+            return res.status(401).json({ success: false, message: 'Invalid credentials' });
+        }
 
-            if (userResults.length === 0) {
-                connection.release(); // Release the connection back to the pool
-                return res.status(401).json({ success: false, message: 'Invalid credentials' });
-            }
+        const user = userResults[0];
 
-            const user = userResults[0];
+        // Check for events at the same place
+        const [eventResults] = await connection.execute(
+            'SELECT * FROM tbl105_MDA_live_event WHERE place = ?',
+            [user.place]
+        );
 
-            // Check for events at the same place
-            const [eventResults] = await connection.execute(
-                'SELECT * FROM tbl105_MDA_live_event WHERE place = ?',
-                [user.place]
-            );
+        // Close the connection
+        await connection.end();
 
-            connection.release(); // Release the connection back to the pool
-
-            if (eventResults.length > 0) {
-                return res.json({ success: true, user, hasEvent: true, event: eventResults[0] });
-            } else {
-                return res.json({ success: true, user, hasEvent: false });
-            }
-        } catch (error) {
-            connection.release(); // Ensure the connection is released on error
-            throw error;
+        if (eventResults.length > 0) {
+            return res.json({ success: true, user, hasEvent: true, event: eventResults[0] });
+        } else {
+            return res.json({ success: true, user, hasEvent: false });
         }
     } catch (error) {
         console.error('Error querying database:', error);
