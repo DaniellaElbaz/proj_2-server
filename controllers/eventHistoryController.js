@@ -1,12 +1,7 @@
 exports.eventHistoryController = {
-    async  getEventHistory(req, res) {
+    async getEventHistory(req, res) {
         const { dbConnection } = require('../db_connection');
-        const eventId = req.query.eventId;
         const userId = req.query.userId;
-    
-        if (!eventId || !userId) {
-            return res.status(400).json({ success: false, message: 'Missing eventId or userId' });
-        }
     
         let connection;
         try {
@@ -15,14 +10,14 @@ exports.eventHistoryController = {
                 `SELECT eh.event_id, eh.event_name, eh.address, eh.date_and_time, eh.event_status, eh.event_photo, eh.type_event, eh.map
                  FROM tbl105_events_history eh
                  JOIN tbl105_users_event ue ON eh.event_id = ue.event_id
-                 WHERE eh.event_id = ? AND ue.user_id = ?`,
-                [eventId, userId]
+                 WHERE ue.user_id = ?`,
+                [userId]
             );
     
             if (rows.length > 0) {
-                res.json({ success: true, data: rows[0] });
+                res.json({ success: true, data: rows });
             } else {
-                res.json({ success: false, message: 'Event not found or user not connected to event' });
+                res.json({ success: false, message: 'No events found for the user' });
             }
         } catch (error) {
             console.error('Error fetching event details:', error);
