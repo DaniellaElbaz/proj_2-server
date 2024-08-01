@@ -1,10 +1,13 @@
+const { dbConnection } = require('../db_connection');
+
 exports.accountController = {
     login: async function(req, res) {
         const { username, password } = req.body;
-        const { dbConnection } = require('../db_connection');
+
         if (!username || !password) {
             return res.status(400).json({ success: false, message: 'Username and password are required' });
         }
+
         let connection;
         try {
             connection = await dbConnection.createConnection();
@@ -20,7 +23,7 @@ exports.accountController = {
 
                 // קריאה לפונקציה לעדכון event_id בהתאמה למקום
                 try {
-                    await this.updateEventIdByPlace(userId);
+                    await exports.accountController.updateEventIdByPlace(userId); // שימוש ב-exports
                 } catch (updateError) {
                     console.error('Error during event ID update:', updateError);
                 }
@@ -48,7 +51,6 @@ exports.accountController = {
     },
 
     updateEventIdByPlace: async function(userId) {
-        const { dbConnection } = require('../db_connection');
         let connection;
         try {
             connection = await dbConnection.createConnection();
@@ -61,8 +63,6 @@ exports.accountController = {
                 WHERE a.user_id = ?
             `, [userId]);
 
-            connection.end();
-
             if (result.affectedRows > 0) {
                 console.log(`Event ID updated for user ${userId} based on matching place.`);
             } else {
@@ -71,11 +71,14 @@ exports.accountController = {
         } catch (error) {
             console.error('Error updating event_id by place:', error); // הדפס את השגיאה כאן
             throw error;
+        } finally {
+            if (connection) {
+                connection.end(); // ודא שהחיבור נסגר כראוי
+            }
         }
     },
 
     updateUserPlace: async function(eventPlace) {
-        const { dbConnection } = require('../db_connection');
         let connection;
         try {
             connection = await dbConnection.createConnection();
@@ -94,7 +97,6 @@ exports.accountController = {
     },
 
     insertUpdateRecord: async function(eventId, updateDescription) {
-        const { dbConnection } = require('../db_connection');
         let connection;
         try {
             connection = await dbConnection.createConnection();
