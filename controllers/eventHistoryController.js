@@ -1,29 +1,39 @@
 exports.eventHistoryController = {
-async getEventHistory(req, res) {
-    const { dbConnection } = require('../db_connection');
-    const eventId = req.query.eventId;
-    const userId = req.query.userId;
-
-    try {
-        const connection = await dbConnection.createConnection();
-        const [rows] = await connection.execute(
-            `SELECT eh.event_id, eh.event_name, eh.address, eh.date_and_time, eh.event_status, eh.event_photo, eh.type_event, eh.map
-             FROM tbl105_events_history eh
-             JOIN tbl105_users_event ue ON eh.event_id = ue.event_id
-             WHERE eh.event_id = ? AND ue.user_id = ?`,
-            [eventId, userId]
-        );
-        connection.end();
-        if (rows.length > 0) {
-            res.json({ success: true, data: rows[0] });
-        } else {
-            res.json({ success: false, message: 'Event not found or user not connected to event' });
+    async  getEventHistory(req, res) {
+        const { dbConnection } = require('../db_connection');
+        const eventId = req.query.eventId;
+        const userId = req.query.userId;
+    
+        if (!eventId || !userId) {
+            return res.status(400).json({ success: false, message: 'Missing eventId or userId' });
         }
-    } catch (error) {
-        console.error('Error fetching event details:', error);
-        res.status(500).send({ success: false, message: 'Error fetching event details' });
+    
+        let connection;
+        try {
+            connection = await dbConnection.createConnection();
+            const [rows] = await connection.execute(
+                `SELECT eh.event_id, eh.event_name, eh.address, eh.date_and_time, eh.event_status, eh.event_photo, eh.type_event, eh.map
+                 FROM tbl105_events_history eh
+                 JOIN tbl105_users_event ue ON eh.event_id = ue.event_id
+                 WHERE eh.event_id = ? AND ue.user_id = ?`,
+                [eventId, userId]
+            );
+    
+            if (rows.length > 0) {
+                res.json({ success: true, data: rows[0] });
+            } else {
+                res.json({ success: false, message: 'Event not found or user not connected to event' });
+            }
+        } catch (error) {
+            console.error('Error fetching event details:', error);
+            res.status(500).send({ success: false, message: 'Error fetching event details' });
+        } finally {
+            if (connection) {
+                connection.end();
+            }
+        }
     }
-},
+    ,
 async getEventByTypeEndDate(req, res) {
     const { dbConnection } = require('../db_connection');
     let { eventType, date_and_time } = req.query;
