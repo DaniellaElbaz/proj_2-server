@@ -72,7 +72,6 @@ exports.eventTypeController = {
             const eventPlace = event[0].place;
             const [result] = await connection.execute('DELETE FROM tbl105_MDA_live_event WHERE event_id = ?', [eventId]);
             if (result.affectedRows > 0) {
-                await updateUserPlace(null);
                 connection.end();
                 const io = req.app.get('io');
                 io.emit('eventDeleted', { eventId });
