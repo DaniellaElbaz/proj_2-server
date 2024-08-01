@@ -55,22 +55,5 @@ exports.accountController = {
             throw error;
         }
     },
-    async updateEventIdByPlace() {
-        const { dbConnection } = require('../db_connection');
-        try {
-            const connection = await dbConnection.createConnection();
-
-            await connection.execute(`
-                UPDATE tbl105_account AS a
-                JOIN tbl105_MDA_live_event AS e
-                ON a.place = e.place
-                SET a.event_id = e.event_id
-            `);
-
-            connection.end();
-        } catch (error) {
-            console.error('Error updating event_id by place:', error);
-            throw error;
-        }
-    }
+    
 };
