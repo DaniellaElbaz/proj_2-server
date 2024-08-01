@@ -26,18 +26,29 @@ exports.eventTypeController = {
     async addEvents(req, res) {
         const { dbConnection } = require('../db_connection');
         const { accountController } = require('./accountController');
-        const { updateUserPlace } =accountController;
+        const { updateUserPlace } = accountController;
         try {
             const connection = await dbConnection.createConnection();
             const { eventName, eventPlace, eventDate, eventTime, eventStatus, eventType, maxHelper } = req.body;
             const photos = req.files.map(file => file.filename).join(',');
             const values = [eventName, eventPlace, eventDate, eventTime, eventStatus, photos, eventType, maxHelper];
+            
+            // Insert into tbl105_MDA_live_event
             const [queryResult] = await connection.execute(
                 'INSERT INTO tbl105_MDA_live_event (event_name, place, date, time, status, map, event_type, max_helper) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
                 values
             );
+    
+            // Insert into tbl105_events_history
+            const historyValues = [queryResult.insertId, eventName, eventPlace, eventDate, eventStatus, photos, eventType, photos];
+            await connection.execute(
+                'INSERT INTO tbl105_events_history (event_id, event_name, address, date_and_time, event_status, event_photo, type_event, map) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                historyValues
+            );
+    
             await updateUserPlace(eventPlace);
             connection.end();
+    
             const io = req.app.get('io');
             io.emit('eventAdded', { eventName, eventPlace, eventDate, eventTime, eventStatus, photos, eventType, maxHelper });
             res.json({ success: true, queryResult });
