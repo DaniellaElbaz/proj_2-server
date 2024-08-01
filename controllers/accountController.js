@@ -39,20 +39,38 @@ exports.accountController = {
     },
     async insertUpdateRecord(eventId, updateDescription) {
         const { dbConnection } = require('../db_connection');
-    try {
-        const connection = await dbConnection.createConnection();
-        const now = new Date();
-        const timeString = now.toTimeString().split(' ')[0];
+        try {
+            const connection = await dbConnection.createConnection();
+            const now = new Date();
+            const timeString = now.toTimeString().split(' ')[0];
 
-        await connection.execute(
-            'INSERT INTO tbl105_update_MDA_event (event_id, update_description,time) VALUES (?, ?, ?)',
-            [eventId, updateDescription, timeString]
-        );
+            await connection.execute(
+                'INSERT INTO tbl105_update_MDA_event (event_id, update_description,time) VALUES (?, ?, ?)',
+                [eventId, updateDescription, timeString]
+            );
 
-        connection.end();
-    } catch (error) {
-        console.error('Error inserting update record:', error);
-        throw error;
+            connection.end();
+        } catch (error) {
+            console.error('Error inserting update record:', error);
+            throw error;
+        }
+    },
+    async updateEventIdByPlace() {
+        const { dbConnection } = require('../db_connection');
+        try {
+            const connection = await dbConnection.createConnection();
+
+            await connection.execute(`
+                UPDATE dbShnkr24stud.tbl105_account AS a
+                JOIN dbShnkr24stud.tbl105_MDA_live_event AS e
+                ON a.place = e.place
+                SET a.event_id = e.event_id
+            `);
+
+            connection.end();
+        } catch (error) {
+            console.error('Error updating event_id by place:', error);
+            throw error;
+        }
     }
-}
 };
