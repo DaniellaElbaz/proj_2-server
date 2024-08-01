@@ -1,30 +1,17 @@
 exports.eventLiveController = {
     async getLiveReports(req, res) {
         const { dbConnection } = require('../db_connection');
+        const eventId = req.params.eventId;
         try {
             const connection = await dbConnection.createConnection();
-
-            // השאילתא הראשונה להבאת הדיווח האחרון
-            const [eventLiveReports] = await connection.execute(`
-                SELECT event_name, event_status, type_event 
-                FROM tbl105_events_history 
-                ORDER BY date_and_time DESC 
-                LIMIT 1;
-            `);
-
-            // השאילתא השנייה להבאת 3 האירועים העדכניים ביותר לפי שעות
-            const [recentReports] = await connection.execute(`
-                SELECT update_description,time
-                FROM tbl105_update_MDA_event
-                ORDER BY time DESC
-                LIMIT 3;
-            `);
-
-            connection.end();
-
-            res.json({ success: true, eventLiveReports, recentReports });
+            const [recentReports] = await connection.execute(
+                'SELECT * FROM tbl105_update_MDA_event WHERE event_id = ? ORDER BY time DESC LIMIT 3',
+                [eventId]
+            );
+            await connection.end();
+            res.json({ success: true, recentReports });
         } catch (error) {
-            console.error('Error fetching event Notification:', error);
+            console.error('Error fetching event notifications:', error);
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
     }

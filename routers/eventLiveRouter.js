@@ -3,6 +3,6 @@ const { eventLiveController } = require('../controllers/eventLiveController.js')
 
 const eventLiveRouter = new Router();
 
-eventLiveRouter.get('/', eventLiveController.getLiveReports);
+eventLiveRouter.get('/:eventId', eventLiveController.getLiveReports);
 
 module.exports = { eventLiveRouter };

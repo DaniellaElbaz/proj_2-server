@@ -2,9 +2,7 @@ exports.accountController = {
     async login(req, res) {
         const { dbConnection } = require('../db_connection');
         const { username, password } = req.body;
-
     try {
-        // Get a connection from the pool
         const connection = await dbConnection.createConnection();
         const [userResults] = await connection.execute(
             'SELECT * FROM tbl105_account WHERE username = ? AND password = ?',
@@ -15,16 +13,11 @@ exports.accountController = {
             await connection.end();
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
-
         const user = userResults[0];
-
-        // Check for events at the same place
         const [eventResults] = await connection.execute(
             'SELECT * FROM tbl105_MDA_live_event WHERE place = ?',
             [user.place]
         );
-
-        // Close the connection
         await connection.end();
 
         if (eventResults.length > 0) {
