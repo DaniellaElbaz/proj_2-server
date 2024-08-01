@@ -1,39 +1,34 @@
 exports.accountController = {
     async login(req, res) {
-        const { username, password } = req.body;
         const { dbConnection } = require('../db_connection');
-        if (!username || !password) {
-            return res.status(400).json({ success: false, message: 'Username and password are required' });
-        }
+        const { username, password } = req.body;
         try {
-            const connection = await dbConnection.createConnection();
-            const [rows] = await connection.execute(
-                'SELECT * FROM tbl105_account WHERE username = ? AND password = ?',
-                [username, password]
-            );
-
-            if (rows.length > 0) {
-                const userId = rows[0].user_id;
-
-                // עדכון event_id בחשבון על פי התאמת place
-                const [updateResult] = await connection.execute(`
-                    UPDATE tbl105_account AS a
-                    JOIN tbl105_MDA_live_event AS e ON a.place = e.place
-                    SET a.event_id = e.event_id
-                    WHERE a.user_id = ?
-                `, [userId]);
-
-                console.log(`Updated ${updateResult.affectedRows} rows with matching place.`);
-
-                // החזרת תגובה לאחר עדכון מוצלח
-                res.json({ success: true, user: rows[0] });
-            } else {
-                res.status(401).json({ success: false, message: 'Invalid credentials' });
+            const userQuery = 'SELECT * FROM tbl105_account WHERE username = ? AND password = ?';
+            const userResults = await new Promise((resolve, reject) => {
+                dbConnection.query(userQuery, [username, password], (err, results) => {
+                    if (err) return reject(err);
+                    resolve(results);
+                });
+            });
+            if (userResults.length === 0) {
+                return res.status(401).json({ success: false, message: 'Invalid credentials' });
             }
-            connection.end();
+            const user = userResults[0];
+            const eventQuery = 'SELECT * FROM tbl105_MDA_live_event WHERE place = ?';
+            const eventResults = await new Promise((resolve, reject) => {
+                dbConnection.query(eventQuery, [user.place], (err, results) => {
+                    if (err) return reject(err);
+                    resolve(results);
+                });
+            });
+            if (eventResults.length > 0) {
+                return res.json({ success: true, user, hasEvent: true, event: eventResults[0] });
+            } else {
+                return res.json({ success: true, user, hasEvent: false });
+            }
         } catch (error) {
-            console.error('Error during login:', error);
-            res.status(500).json({ success: false, message: 'Internal Server Error' });
+            console.error('Error querying database:', error);
+            return res.status(500).json({ success: false, message: 'Internal server error' });
         }
     },
     async updateUserPlace(eventPlace) {
@@ -52,20 +47,20 @@ exports.accountController = {
     },
     async insertUpdateRecord(eventId, updateDescription) {
         const { dbConnection } = require('../db_connection');
-        try {
-            const connection = await dbConnection.createConnection();
-            const now = new Date();
-            const timeString = now.toTimeString().split(' ')[0];
+    try {
+        const connection = await dbConnection.createConnection();
+        const now = new Date();
+        const timeString = now.toTimeString().split(' ')[0];
 
-            await connection.execute(
-                'INSERT INTO tbl105_update_MDA_event (event_id, update_description,time) VALUES (?, ?, ?)',
-                [eventId, updateDescription, timeString]
-            );
+        await connection.execute(
+            'INSERT INTO tbl105_update_MDA_event (event_id, update_description,time) VALUES (?, ?, ?)',
+            [eventId, updateDescription, timeString]
+        );
 
-            connection.end();
-        } catch (error) {
-            console.error('Error inserting update record:', error);
-            throw error;
-        }
-    },
+        connection.end();
+    } catch (error) {
+        console.error('Error inserting update record:', error);
+        throw error;
+    }
+}
 };
