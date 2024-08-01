@@ -55,5 +55,31 @@ exports.accountController = {
             throw error;
         }
     },
-    
+    async updateEventIdByPlaceForUser(userId) {
+        const { dbConnection } = require('../db_connection');
+
+        try {
+            const connection = await dbConnection.createConnection();
+
+            // עדכון event_id למשתמש בהתאמה למקום
+            const [result] = await connection.execute(`
+                UPDATE tbl105_account AS a
+                JOIN tbl105_MDA_live_event AS e
+                ON a.place = e.place
+                SET a.event_id = e.event_id
+                WHERE a.user_id = ?
+            `, [userId]);
+
+            connection.end();
+            
+            if (result.affectedRows > 0) {
+                console.log(`Event ID updated for user ${userId} based on matching place.`);
+            } else {
+                console.log(`No matching place found for user ${userId}, no update made.`);
+            }
+        } catch (error) {
+            console.error('Error updating event_id by place:', error);
+            throw error;
+        }
+    }
 };

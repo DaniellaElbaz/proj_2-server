@@ -1,25 +1,40 @@
 exports.eventLiveController = {
     async getLiveReports(req, res) {
         const { dbConnection } = require('../db_connection');
+        const userId = req.params.userId; // קבלת userId מהפרמטרים של הבקשה
+
         try {
             const connection = await dbConnection.createConnection();
 
-            // השאילתא הראשונה להבאת הדיווח האחרון
+            // שאילתא להבאת event_id של המשתמש
+            const [userEvent] = await connection.execute(`
+                SELECT event_id 
+                FROM tbl105_account 
+                WHERE user_id = ?
+            `, [userId]);
+
+            // בדיקה אם נמצא event_id
+            if (userEvent.length === 0) {
+                return res.status(404).json({ success: false, message: 'Event ID not found for user' });
+            }
+
+            const eventId = userEvent[0].event_id;
+
+            // השאילתא להבאת הדיווחים העדכניים ביותר עבור event_id המתאים
+            const [recentReports] = await connection.execute(`
+                SELECT u.update_description, u.time
+                FROM tbl105_update_MDA_event u
+                WHERE u.event_id = ?
+                ORDER BY u.time DESC
+                LIMIT 3;
+            `, [eventId]);
+
+            // השאילתא להבאת הדיווח האחרון מהיסטוריית האירועים (נשארת כפי שהיא)
             const [eventLiveReports] = await connection.execute(`
                 SELECT event_name, event_status, type_event 
                 FROM tbl105_events_history 
                 ORDER BY date_and_time DESC 
                 LIMIT 1;
-            `);
-
-            // השאילתא השנייה להבאת 3 האירועים העדכניים ביותר לפי שעות עבור האירועים המתאימים
-            const [recentReports] = await connection.execute(`
-                SELECT u.update_description, u.time
-                FROM tbl105_update_MDA_event u
-                INNER JOIN tbl105_account a ON u.event_id = a.event_id
-                WHERE a.event_id IS NOT NULL
-                ORDER BY u.time DESC
-                LIMIT 3;
             `);
 
             connection.end();

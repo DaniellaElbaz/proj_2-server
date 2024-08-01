@@ -3,6 +3,7 @@ const { eventLiveController } = require('../controllers/eventLiveController.js')
 
 const eventLiveRouter = new Router();
 
-eventLiveRouter.get('/', eventLiveController.getLiveReports);
+// שינוי המסלול כך שיכלול את userId כפרמטר ב-URL
+eventLiveRouter.get('/:userId', eventLiveController.getLiveReports);
 
 module.exports = { eventLiveRouter };
