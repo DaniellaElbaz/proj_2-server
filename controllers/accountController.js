@@ -1,13 +1,10 @@
-const { dbConnection } = require('../db_connection');
-
 exports.accountController = {
-    login: async function(req, res) {
+    async login(req, res) {
         const { username, password } = req.body;
-
+        const { dbConnection } = require('../db_connection');
         if (!username || !password) {
             return res.status(400).json({ success: false, message: 'Username and password are required' });
         }
-
         let connection;
         try {
             connection = await dbConnection.createConnection();
@@ -21,11 +18,11 @@ exports.accountController = {
             if (rows.length > 0) {
                 const userId = rows[0].user_id;
 
-                // קריאה לפונקציה לעדכון event_id בהתאמה למקום
+                // קריאה לפונקציה להכנסת נתונים לטבלה tbl105_users_event
                 try {
-                    await exports.accountController.updateEventIdByPlace(userId); // שימוש ב-exports
-                } catch (updateError) {
-                    console.error('Error during event ID update:', updateError);
+                    await exports.accountController.insertUserEvent(userId);
+                } catch (insertError) {
+                    console.error('Error during user event insertion:', insertError);
                 }
 
                 // שליפה מחודשת של פרטי המשתמש לאחר העדכון
@@ -50,26 +47,28 @@ exports.accountController = {
         }
     },
 
-    updateEventIdByPlace: async function(userId) {
+    insertUserEvent: async function(userId) {
+        const { dbConnection } = require('../db_connection');
         let connection;
         try {
             connection = await dbConnection.createConnection();
 
-            // עדכון event_id בטבלת tbl105_account לפי התאמת place
+            // הכנס את הנתונים לטבלה tbl105_users_event כאשר place זהה בשתי הטבלאות
             const [result] = await connection.execute(`
-                UPDATE tbl105_account AS a
+                INSERT INTO tbl105_users_event (user_id, event_id, place)
+                SELECT a.user_id, e.event_id, a.place
+                FROM tbl105_account AS a
                 JOIN tbl105_MDA_live_event AS e ON TRIM(a.place) = TRIM(e.place)
-                SET a.event_id = e.event_id
-                WHERE a.user_id = ?
+                WHERE a.user_id = ?;
             `, [userId]);
 
             if (result.affectedRows > 0) {
-                console.log(`Event ID updated for user ${userId} based on matching place.`);
+                console.log(`User event record inserted for user ${userId}.`);
             } else {
-                console.log(`No matching place found for user ${userId}, no update made.`);
+                console.log(`No matching place found for user ${userId}, no insertion made.`);
             }
         } catch (error) {
-            console.error('Error updating event_id by place:', error); // הדפס את השגיאה כאן
+            console.error('Error inserting user event record:', error); // הדפס את השגיאה כאן
             throw error;
         } finally {
             if (connection) {
@@ -78,42 +77,5 @@ exports.accountController = {
         }
     },
 
-    updateUserPlace: async function(eventPlace) {
-        let connection;
-        try {
-            connection = await dbConnection.createConnection();
-            await connection.execute(
-                'UPDATE tbl105_account SET place = ? WHERE certification_type = "Medical"',
-                [eventPlace]
-            );
-        } catch (error) {
-            console.error('Error updating user place:', error);
-            throw error;
-        } finally {
-            if (connection) {
-                connection.end(); // ודא שהחיבור נסגר כראוי
-            }
-        }
-    },
-
-    insertUpdateRecord: async function(eventId, updateDescription) {
-        let connection;
-        try {
-            connection = await dbConnection.createConnection();
-            const now = new Date();
-            const timeString = now.toTimeString().split(' ')[0];
-
-            await connection.execute(
-                'INSERT INTO tbl105_update_MDA_event (event_id, update_description, time) VALUES (?, ?, ?)',
-                [eventId, updateDescription, timeString]
-            );
-        } catch (error) {
-            console.error('Error inserting update record:', error);
-            throw error;
-        } finally {
-            if (connection) {
-                connection.end(); // ודא שהחיבור נסגר כראוי
-            }
-        }
-    }
+    // פונקציות נוספות...
 };
