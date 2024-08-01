@@ -16,7 +16,7 @@ exports.eventLiveController = {
             const [recentReports] = await connection.execute(`
                 SELECT report_description
                 FROM tbl105_MDA_reports
-                ORDER BY date_and_time DESC
+                ORDER BY report_time DESC
                 LIMIT 3;
             `);
 
