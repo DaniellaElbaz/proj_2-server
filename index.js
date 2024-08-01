@@ -47,6 +47,7 @@ const upload = multer({
         }
     })
 });
+app.set('io', io); 
 app.use((req, res, next) => {
     req.io = io;
     next();
