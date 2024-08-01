@@ -12,11 +12,13 @@ exports.eventLiveController = {
                 LIMIT 1;
             `);
 
-            // השאילתא השנייה להבאת 3 האירועים העדכניים ביותר לפי שעות
+            // השאילתא השנייה להבאת 3 האירועים העדכניים ביותר לפי שעות עבור האירועים המתאימים
             const [recentReports] = await connection.execute(`
-                SELECT update_description,time
-                FROM tbl105_update_MDA_event
-                ORDER BY time DESC
+                SELECT u.update_description, u.time
+                FROM tbl105_update_MDA_event u
+                INNER JOIN tbl105_account a ON u.event_id = a.event_id
+                WHERE a.event_id IS NOT NULL
+                ORDER BY u.time DESC
                 LIMIT 3;
             `);
 
