@@ -61,8 +61,8 @@ exports.accountController = {
             const connection = await dbConnection.createConnection();
 
             await connection.execute(`
-                UPDATE dbShnkr24stud.tbl105_account AS a
-                JOIN dbShnkr24stud.tbl105_MDA_live_event AS e
+                UPDATE tbl105_account AS a
+                JOIN tbl105_MDA_live_event AS e
                 ON a.place = e.place
                 SET a.event_id = e.event_id
             `);
