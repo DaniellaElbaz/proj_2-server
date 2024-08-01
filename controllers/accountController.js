@@ -2,35 +2,42 @@ exports.accountController = {
     async login(req, res) {
         const { dbConnection } = require('../db_connection');
         const { username, password } = req.body;
-        try {
-            const userQuery = 'SELECT * FROM tbl105_account WHERE username = ? AND password = ?';
-            const userResults = await new Promise((resolve, reject) => {
-                dbConnection.query(userQuery, [username, password], (err, results) => {
-                    if (err) return reject(err);
-                    resolve(results);
-                });
+
+    try {
+        // Check user credentials
+        const userQuery = 'SELECT * FROM tbl105_account WHERE username = ? AND password = ?';
+        const userResults = await new Promise((resolve, reject) => {
+            dbConnection.query(userQuery, [username, password], (err, results) => {
+                if (err) return reject(err);
+                resolve(results);
             });
-            if (userResults.length === 0) {
-                return res.status(401).json({ success: false, message: 'Invalid credentials' });
-            }
-            const user = userResults[0];
-            const eventQuery = 'SELECT * FROM tbl105_MDA_live_event WHERE place = ?';
-            const eventResults = await new Promise((resolve, reject) => {
-                dbConnection.query(eventQuery, [user.place], (err, results) => {
-                    if (err) return reject(err);
-                    resolve(results);
-                });
-            });
-            if (eventResults.length > 0) {
-                return res.json({ success: true, user, hasEvent: true, event: eventResults[0] });
-            } else {
-                return res.json({ success: true, user, hasEvent: false });
-            }
-        } catch (error) {
-            console.error('Error querying database:', error);
-            return res.status(500).json({ success: false, message: 'Internal server error' });
+        });
+
+        if (userResults.length === 0) {
+            return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
-    },
+
+        const user = userResults[0];
+
+        // Check for events at the same place
+        const eventQuery = 'SELECT * FROM tbl105_MDA_live_event WHERE place = ?';
+        const eventResults = await new Promise((resolve, reject) => {
+            dbConnection.query(eventQuery, [user.place], (err, results) => {
+                if (err) return reject(err);
+                resolve(results);
+            });
+        });
+
+        if (eventResults.length > 0) {
+            return res.json({ success: true, user, hasEvent: true, event: eventResults[0] });
+        } else {
+            return res.json({ success: true, user, hasEvent: false });
+        }
+    } catch (error) {
+        console.error('Error querying database:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+},
     async updateUserPlace(eventPlace) {
         const { dbConnection } = require('../db_connection');
         try {
