@@ -7,11 +7,8 @@ exports.eventHistoryController = {
         try {
             connection = await dbConnection.createConnection();
             const [rows] = await connection.execute(
-                `SELECT eh.event_id, eh.event_name, eh.address, eh.date_and_time, eh.event_status, eh.event_photo, eh.type_event, eh.map
-                 FROM tbl105_events_history eh
-                 JOIN tbl105_users_event ue ON eh.event_id = ue.event_id
-                 WHERE ue.user_id = ?`,
-                [userId]
+                `SELECT *
+                 FROM tbl105_events_history `,
             );
     
             if (rows.length > 0) {
