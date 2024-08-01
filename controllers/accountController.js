@@ -4,34 +4,39 @@ exports.accountController = {
         const { username, password } = req.body;
 
     try {
-        // Check user credentials
-        const userQuery = 'SELECT * FROM tbl105_account WHERE username = ? AND password = ?';
-        const userResults = await new Promise((resolve, reject) => {
-            dbConnection.query(userQuery, [username, password], (err, results) => {
-                if (err) return reject(err);
-                resolve(results);
-            });
-        });
+        // Get a connection from the pool
+        const connection = await dbConnection.createConnection();
 
-        if (userResults.length === 0) {
-            return res.status(401).json({ success: false, message: 'Invalid credentials' });
-        }
+        try {
+            // Check user credentials
+            const [userResults] = await connection.execute(
+                'SELECT * FROM tbl105_account WHERE username = ? AND password = ?',
+                [username, password]
+            );
 
-        const user = userResults[0];
+            if (userResults.length === 0) {
+                connection.release(); // Release the connection back to the pool
+                return res.status(401).json({ success: false, message: 'Invalid credentials' });
+            }
 
-        // Check for events at the same place
-        const eventQuery = 'SELECT * FROM tbl105_MDA_live_event WHERE place = ?';
-        const eventResults = await new Promise((resolve, reject) => {
-            dbConnection.query(eventQuery, [user.place], (err, results) => {
-                if (err) return reject(err);
-                resolve(results);
-            });
-        });
+            const user = userResults[0];
 
-        if (eventResults.length > 0) {
-            return res.json({ success: true, user, hasEvent: true, event: eventResults[0] });
-        } else {
-            return res.json({ success: true, user, hasEvent: false });
+            // Check for events at the same place
+            const [eventResults] = await connection.execute(
+                'SELECT * FROM tbl105_MDA_live_event WHERE place = ?',
+                [user.place]
+            );
+
+            connection.release(); // Release the connection back to the pool
+
+            if (eventResults.length > 0) {
+                return res.json({ success: true, user, hasEvent: true, event: eventResults[0] });
+            } else {
+                return res.json({ success: true, user, hasEvent: false });
+            }
+        } catch (error) {
+            connection.release(); // Ensure the connection is released on error
+            throw error;
         }
     } catch (error) {
         console.error('Error querying database:', error);
