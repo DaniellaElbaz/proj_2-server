@@ -24,17 +24,20 @@ exports.accountController = {
                     [userId]
                 );
 
+                connection.end();
+
+                // החזרת פרטי המשתמש לאחר העדכון
                 res.json({ success: true, user: updatedUser[0] });
             } else {
+                connection.end();
                 res.status(401).json({ success: false, message: 'Invalid credentials' });
             }
-            connection.end();
         } catch (error) {
             console.error('Error during login:', error);
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
     },
-    
+
     async updateEventIdByPlace(userId) {
         const { dbConnection } = require('../db_connection');
         try {
@@ -84,7 +87,7 @@ exports.accountController = {
             const timeString = now.toTimeString().split(' ')[0];
 
             await connection.execute(
-                'INSERT INTO tbl105_update_MDA_event (event_id, update_description,time) VALUES (?, ?, ?)',
+                'INSERT INTO tbl105_update_MDA_event (event_id, update_description, time) VALUES (?, ?, ?)',
                 [eventId, updateDescription, timeString]
             );
 
