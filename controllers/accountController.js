@@ -7,6 +7,8 @@ exports.accountController = {
         }
         try {
             const connection = await dbConnection.createConnection();
+            
+            // בדיקת התחברות משתמש
             const [rows] = await connection.execute(
                 'SELECT * FROM tbl105_account WHERE username = ? AND password = ?',
                 [username, password]
@@ -16,7 +18,11 @@ exports.accountController = {
                 const userId = rows[0].user_id;
 
                 // קריאה לפונקציה לעדכון event_id בהתאמה למקום
-                await this.updateEventIdByPlace(userId);
+                try {
+                    await this.updateEventIdByPlace(userId);
+                } catch (updateError) {
+                    console.error('Error during event ID update:', updateError);
+                }
 
                 // שליפה מחודשת של פרטי המשתמש לאחר העדכון
                 const [updatedUser] = await connection.execute(
@@ -24,16 +30,14 @@ exports.accountController = {
                     [userId]
                 );
 
-                connection.end();
-
                 // החזרת פרטי המשתמש לאחר העדכון
                 res.json({ success: true, user: updatedUser[0] });
             } else {
-                connection.end();
                 res.status(401).json({ success: false, message: 'Invalid credentials' });
             }
+            connection.end();
         } catch (error) {
-            console.error('Error during login:', error);
+            console.error('Error during login:', error); // הדפס את השגיאה כאן
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
     },
@@ -59,7 +63,7 @@ exports.accountController = {
                 console.log(`No matching place found for user ${userId}, no update made.`);
             }
         } catch (error) {
-            console.error('Error updating event_id by place:', error);
+            console.error('Error updating event_id by place:', error); // הדפס את השגיאה כאן
             throw error;
         }
     },
