@@ -1,4 +1,4 @@
- exports.accountController = {
+exports.accountController = {
     async login(req, res) {
         const { username, password } = req.body;
         const { dbConnection } = require('../db_connection');
