@@ -13,7 +13,7 @@ exports.eventHistoryController = {
             connection = await dbConnection.createConnection();
             const [rows] = await connection.execute(
                 `SELECT *
-                 FROM tbl105_events_history `,
+                 FROM tbl105_events_history LIMIT 1`,
 
             );
     
