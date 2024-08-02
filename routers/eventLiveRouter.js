@@ -4,5 +4,4 @@ const { eventLiveController } = require('../controllers/eventLiveController.js')
 const eventLiveRouter = new Router();
 
 eventLiveRouter.get('/', eventLiveController.getLiveReports);
-eventLiveRouter.post('/', eventLiveController.insertToUser);
 module.exports = { eventLiveRouter };
