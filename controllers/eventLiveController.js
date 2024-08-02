@@ -5,7 +5,7 @@ exports.eventLiveController = {
         try {
             const connection = await dbConnection.createConnection();
             const [recentReports] = await connection.execute(
-                'SELECT * FROM tbl105_update_MDA_event WHERE event_id = ? ORDER BY time DESC LIMIT 3',
+                'SELECT * FROM tbl105_update_MDA_event ORDER BY time DESC LIMIT 3',
                 [eventId]
             );
             await connection.end();
