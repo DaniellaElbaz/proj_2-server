@@ -5,5 +5,5 @@ const eventLiveRouter = new Router();
 
 eventLiveRouter.get('/:eventId', eventLiveController.getLiveReports);
 eventLiveRouter.post('/',eventLiveController.insertToUser);
-eventLiveRouter.get('/eventParticipants/:eventId', getEventParticipants);
+eventLiveRouter.get('/eventParticipants/:eventId', eventLiveController.getEventParticipants);
 module.exports = { eventLiveRouter };
