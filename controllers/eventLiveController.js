@@ -41,7 +41,7 @@ exports.eventLiveController = {
     
         try {
             const connection = await dbConnection.createConnection();
-            const values = [event_id, user_id, null, place]; // report_id is set to null
+            const values = [event_id, user_id, null, place];
             const [result] = await connection.execute(
                 'INSERT INTO tbl105_users_event (event_id, user_id, report_id, place) VALUES (?, ?, ?, ?)',
                 values
@@ -54,5 +54,44 @@ exports.eventLiveController = {
             console.error('Error inserting data:', error);
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
+},
+async getEventParticipants(req, res) {
+    const { dbConnection } = require('../db_connection');
+    const eventId = req.params.eventId;
+
+    if (!eventId) {
+        return res.status(400).json({ success: false, message: 'Missing event ID' });
+    }
+
+    try {
+        const connection = await dbConnection.createConnection();
+        
+        const [participants] = await connection.execute(`
+            SELECT 
+                u.user_id,
+                u.first_name,
+                u.last_name,
+                u.user_photo,
+                u.phone
+            FROM 
+                tbl105_users_event ue
+            JOIN 
+                tbl105_account u ON ue.user_id = u.user_id
+            WHERE 
+                ue.event_id = ?
+        `, [eventId]);
+
+        await connection.end();
+
+        if (participants.length > 0) {
+            res.json({ success: true, data: participants });
+        } else {
+            res.json({ success: false, message: 'No participants found for this event' });
+        }
+    } catch (error) {
+        console.error('Error fetching event participants:', error);
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
 }
+
 };
