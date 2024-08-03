@@ -12,13 +12,12 @@ exports.eventHistoryController = {
         try {
             connection = await dbConnection.createConnection();
             const [rows] = await connection.execute(
-                `SELECT *
-                 FROM tbl105_events_history LIMIT 1`,
-
+                'SELECT * FROM tbl105_events_history WHERE event_id = ? AND user_id = ?',
+                [eventId, userId]
             );
     
             if (rows.length > 0) {
-                res.json({ success: true, data: rows[0] });
+                res.json({ success: true, data: rows });
             } else {
                 res.json({ success: false, message: 'Event not found or user not connected to event' });
             }
