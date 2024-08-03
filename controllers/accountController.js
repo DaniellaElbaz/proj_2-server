@@ -29,7 +29,7 @@ exports.accountController = {
         console.error('Error querying database:', error);
         return res.status(500).json({ success: false, message: 'Internal server error' });
     }
-},
+    },
     async updateUserPlace(eventPlace) {
         const { dbConnection } = require('../db_connection');
         try {

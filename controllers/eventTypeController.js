@@ -59,20 +59,27 @@ exports.eventTypeController = {
     },
     async deleteEvent(req, res) {
         const { dbConnection } = require('../db_connection');
-        const { accountController } = require('./accountController');
-        const { updateUserPlace } =accountController;
+        const { eventTypeController } = require('./eventTypeController');
+        const { updateUserPlaceForEvent } = eventTypeController;
         const eventId = req.params.id;
+    
         try {
             const connection = await dbConnection.createConnection();
+
             const [event] = await connection.execute('SELECT place FROM tbl105_MDA_live_event WHERE event_id = ?', [eventId]);
             if (event.length === 0) {
                 connection.end();
                 return res.status(404).json({ success: false, message: 'Event not found' });
             }
             const eventPlace = event[0].place;
+            const [lastEvent] = await connection.execute('SELECT event_id FROM tbl105_MDA_live_event ORDER BY event_id DESC LIMIT 1');
+            const isLastEvent = (lastEvent.length > 0 && lastEvent[0].event_id === parseInt(eventId, 10));
             const [result] = await connection.execute('DELETE FROM tbl105_MDA_live_event WHERE event_id = ?', [eventId]);
             if (result.affectedRows > 0) {
                 connection.end();
+                if (isLastEvent) {
+                    await updateUserPlaceForEvent(eventPlace);
+                }
                 const io = req.app.get('io');
                 io.emit('eventDeleted', { eventId });
                 res.json({ success: true });
@@ -83,6 +90,21 @@ exports.eventTypeController = {
         } catch (error) {
             console.error('Error deleting event:', error);
             res.status(500).json({ success: false, message: 'Internal Server Error' });
+        }
+    },
+    async  updateUserPlaceForEvent(eventPlace) {
+        const { dbConnection } = require('../db_connection');
+        try {
+            const connection = await dbConnection.createConnection();
+            await connection.execute(
+                'UPDATE tbl105_account SET place = NULL WHERE place = ? AND certification_type = "Medical"',
+                [eventPlace]
+            );
+            await connection.end();
+            console.log('User place updated successfully');
+        } catch (error) {
+            console.error('Error updating user place:', error);
+            throw error;
         }
     },
     async updateStatus(req, res) {
