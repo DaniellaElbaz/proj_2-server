@@ -15,7 +15,7 @@ exports.accountController = {
         }
         const user = userResults[0];
         const [eventResults] = await connection.execute(
-            'SELECT * FROM tbl105_MDA_live_event WHERE place = ?',
+            'SELECT * FROM tbl105_MDA_live_event WHERE place = ? ORDER BY date DESC, time DESC LIMIT 1',
             [user.place]
         );
         await connection.end();
