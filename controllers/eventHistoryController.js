@@ -3,13 +3,11 @@ exports.eventHistoryController = {
         const { dbConnection } = require('../db_connection');
         const userId = req.query.userId;
         if (!userId) {
-            console.log('Missing userId:', { userId });
             return res.status(400).json({ success: false, message: 'Missing userId' });
         }
         let connection;
         try {
             connection = await dbConnection.createConnection();
-            console.log(`Fetching event history for userId: ${userId}`);
             const [rows] = await connection.execute(
                 `SELECT eh.*
                  FROM tbl105_events_history eh
@@ -17,8 +15,6 @@ exports.eventHistoryController = {
                  WHERE ue.user_id = ?`,
                 [userId]
             );
-
-            console.log('Query executed, rows:', rows);
             if (rows.length > 0) {
                 res.json({ success: true, data: rows });
             } else {
@@ -36,14 +32,11 @@ exports.eventHistoryController = {
 async getEventByTypeEndDate(req, res) {
     const { dbConnection } = require('../db_connection');
     let { eventType, date_and_time } = req.query;
-
     const currentDate = new Date();
     const startOfYear = new Date(currentDate.getFullYear(), 0, 1);
     const formattedMonth = `${startOfYear.getFullYear()}-01`;
-
     eventType = eventType === undefined || eventType === '' ? null : eventType;
     date_and_time = date_and_time === undefined || date_and_time === '' ? formattedMonth : date_and_time;
-
     try {
         const connection = await dbConnection.createConnection();
         const [rows] = await connection.execute(
@@ -62,5 +55,4 @@ async getEventByTypeEndDate(req, res) {
         res.status(500).send({ success: false, message: 'Error fetching event stats' });
     }
 }
-
 };

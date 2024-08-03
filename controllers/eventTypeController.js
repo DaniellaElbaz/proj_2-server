@@ -32,23 +32,17 @@ exports.eventTypeController = {
             const { eventName, eventPlace, eventDate, eventTime, eventStatus, eventType, maxHelper } = req.body;
             const photos = req.files.map(file => file.filename).join(',');
             const values = [eventName, eventPlace, eventDate, eventTime, eventStatus, photos, eventType, maxHelper];
-            
-            // Insert into tbl105_MDA_live_event
             const [queryResult] = await connection.execute(
                 'INSERT INTO tbl105_MDA_live_event (event_name, place, date, time, status, map, event_type, max_helper) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
                 values
             );
-    
-            // Insert into tbl105_events_history
             const historyValues = [queryResult.insertId, eventName, eventPlace, eventDate, eventStatus, photos, eventType, photos];
             await connection.execute(
                 'INSERT INTO tbl105_events_history (event_id, event_name, address, date_and_time, event_status, event_photo, type_event, map) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
                 historyValues
             );
-    
             await updateUserPlace(eventPlace);
             connection.end();
-    
             const io = req.app.get('io');
             io.emit('eventAdded', { eventName, eventPlace, eventDate, eventTime, eventStatus, photos, eventType, maxHelper });
             res.json({ success: true, queryResult });
@@ -62,10 +56,8 @@ exports.eventTypeController = {
         const { eventTypeController } = require('./eventTypeController');
         const { updateUserPlaceForEvent } = eventTypeController;
         const eventId = req.params.id;
-    
         try {
             const connection = await dbConnection.createConnection();
-
             const [event] = await connection.execute('SELECT place FROM tbl105_MDA_live_event WHERE event_id = ?', [eventId]);
             if (event.length === 0) {
                 connection.end();
@@ -101,7 +93,6 @@ exports.eventTypeController = {
                 [eventPlace]
             );
             await connection.end();
-            console.log('User place updated successfully');
         } catch (error) {
             console.error('Error updating user place:', error);
             throw error;
@@ -113,14 +104,13 @@ exports.eventTypeController = {
         const { insertUpdateRecord } =accountController;
         const eventId = req.params.id;
         const eventStatus = req.body.status;
-        const io = req.io; 
+        const io = req.io;
         try {
             const connection = await dbConnection.createConnection();
             await connection.execute(
                 'UPDATE tbl105_MDA_live_event SET status = ? WHERE event_id = ?',
                 [eventStatus, eventId]
             );
-           
             await insertUpdateRecord(eventId, eventStatus);
             io.emit('statusUpdate', { eventId, eventStatus});
             connection.end();

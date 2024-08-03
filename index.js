@@ -31,23 +31,19 @@ app.use((req, res, next) => {
 const imagesDir = path.join(__dirname, 'images');
 if (!fs.existsSync(imagesDir)) {
     fs.mkdirSync(imagesDir, { recursive: true });
-    console.log(`Created images directory at: ${imagesDir}`);
 } else {
-    console.log(`Images directory exists at: ${imagesDir}`);
 }
 const upload = multer({
     storage: multer.diskStorage({
         destination: function (req, file, cb) {
-            console.log(`Saving file to: ${imagesDir}`);
             cb(null, imagesDir);
         },
         filename: function (req, file, cb) {
-            console.log(`Saving file as: ${file.originalname}`);
             cb(null, file.originalname);
         }
     })
 });
-app.set('io', io); 
+app.set('io', io);
 app.use((req, res, next) => {
     req.io = io;
     next();
@@ -64,7 +60,5 @@ app.use((req, res) => {
     console.error('Path not found:', req.path);
     res.status(400).send('something is broken!');
 });
-
 server.listen(port, () => {
-    console.log(`Listening on port ${port}`);
 });

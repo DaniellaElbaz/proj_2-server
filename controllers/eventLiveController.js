@@ -4,26 +4,18 @@ exports.eventLiveController = {
         const eventId = req.params.eventId;
         try {
             const connection = await dbConnection.createConnection();
-            
-            // Fetch the latest event
             const [latestEvent] = await connection.execute(
                 'SELECT * FROM tbl105_MDA_live_event ORDER BY event_id DESC LIMIT 1'
             );
-            
             if (latestEvent.length === 0) {
                 return res.status(404).json({ success: false, message: 'No events found' });
             }
-    
             const latestEventId = latestEvent[0].event_id;
-            
-            // Fetch updates related to the latest event
             const [recentReports] = await connection.execute(
                 'SELECT * FROM tbl105_update_MDA_event WHERE event_id = ? ORDER BY time DESC LIMIT 3',
                 [latestEventId]
             );
-    
             await connection.end();
-            
             res.json({ success: true, latestEvent: latestEvent[0], recentReports });
         } catch (error) {
             console.error('Error fetching latest event updates:', error);
@@ -33,12 +25,9 @@ exports.eventLiveController = {
     async insertToUser(req, res){
         const { dbConnection } = require('../db_connection');
         const { user_id, event_id, place } = req.body;
-
         if (!user_id || !event_id || !place) {
-            console.log('Missing required fields:', { user_id, event_id, place });
             return res.status(400).json({ success: false, message: 'User ID, Event ID, and place are required' });
         }
-    
         try {
             const connection = await dbConnection.createConnection();
             const values = [event_id, user_id, null, place];
@@ -47,8 +36,6 @@ exports.eventLiveController = {
                 values
             );
             await connection.end();
-    
-            console.log('Data inserted successfully:', result);
             res.json({ success: true, result });
         } catch (error) {
             console.error('Error inserting data:', error);
@@ -58,31 +45,26 @@ exports.eventLiveController = {
 async getEventParticipants(req, res) {
     const { dbConnection } = require('../db_connection');
     const eventId = req.params.eventId;
-
     if (!eventId) {
         return res.status(400).json({ success: false, message: 'Missing event ID' });
     }
-
     try {
         const connection = await dbConnection.createConnection();
-        
         const [participants] = await connection.execute(`
-            SELECT 
+            SELECT
                 u.user_id,
                 u.first_name,
                 u.last_name,
                 u.user_photo,
                 u.phone
-            FROM 
+            FROM
                 tbl105_users_event ue
-            JOIN 
+            JOIN
                 tbl105_account u ON ue.user_id = u.user_id
-            WHERE 
+            WHERE
                 ue.event_id = ?
         `, [eventId]);
-
         await connection.end();
-
         if (participants.length > 0) {
             res.json({ success: true, data: participants });
         } else {
@@ -93,5 +75,4 @@ async getEventParticipants(req, res) {
         res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 }
-
 };
