@@ -42,6 +42,26 @@ exports.eventLiveController = {
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
 },
+async updateUserPlace(req, res) {
+    const { dbConnection } = require('../db_connection');
+    const { user_id, place } = req.body;
+
+    if (typeof user_id !== 'number' || user_id <= 0 || place !== null) {
+        return res.status(400).json({ success: false, message: 'Invalid user ID or place' });
+    }
+    try {
+        const connection = await dbConnection.createConnection();
+        await connection.execute(
+            'UPDATE tbl105_account SET place = ? WHERE user_id = ?',
+            [place, user_id]
+        );
+        await connection.end();
+        res.json({ success: true, message: 'User place updated successfully' });
+    } catch (error) {
+        console.error('Error updating user place:', error);
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+},
 async getEventParticipants(req, res) {
     const { dbConnection } = require('../db_connection');
     const eventId = req.params.eventId;
